@@ -6,7 +6,7 @@ const fs = require('fs')
 const multer = require('multer')
 const path = require('path')
 const uploadPath = path.join('public', Book.coverImageBasePath)
-const imageMimeTypes = ['images/jpeg', 'images/png', 'images/gif']
+const imageMimeTypes = ['images/jpeg', 'images/png', 'images/gif', 'images/jpg']
 const upload = multer({
     dest: uploadPath,
     fileFilter: (req, file, callback) => {
@@ -48,7 +48,7 @@ router.post('/', upload.single('cover'), async (req, res) => {
     const book = new Book({
         title: req.body.title,
         author: req.body.author,
-        poblishDate: new Date(req.body.publishDate),
+        publishDate: new Date(req.body.publishDate),
         pageCount: req.body.pageCount,
         coverImageName: fileName, 
         description: req.body.description,
@@ -56,8 +56,8 @@ router.post('/', upload.single('cover'), async (req, res) => {
 
     try{
         const newBook = await book.save()
-        // res.redirect(`books/${newAuthor.id}`)
-        res.redirect('books')
+        // res.redirect(`books/${newBook.id}`)
+        res.redirect(`books`)
     } catch {
         if (book.coverImageName != null) {
             removeBookCover(book.coverImageName)
@@ -70,16 +70,12 @@ router.post('/', upload.single('cover'), async (req, res) => {
 async function renderNewPage(res, book, hasError = false) {
     try {
         const authors = await Author.find({})
-        const book = new Book()
         const params = {
             authors: authors,
             book: book
         }
         if (hasError) params.errorMessage = 'Error Creating Book'
-        res.render('books/new', {
-            authors: authors,
-            book: book
-        })
+        res.render('books/new', params)
     } catch {
         res.redirect('/books')
     }
